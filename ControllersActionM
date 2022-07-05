@@ -1,0 +1,27 @@
+//one parameter pass
+using System.Web.Mvc;
+
+namespace WebApplication17.Controllers
+{
+    public class EmpController : Controller
+    {
+       public string Empprofile(int id)
+            
+        {
+            string profile = string.Empty;
+            if(id==1)
+            {
+                profile = "Emp 1 profile";
+            }
+            else if(id ==2)
+            {
+                profile = "Emp 2 profile";
+            }
+            else
+            {
+                profile = "No record found";
+            }
+            return profile;
+        }
+    }
+}
