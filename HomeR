@@ -1,0 +1,72 @@
+using ProjectM.Models;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace ProjectM.Controllers
+{
+    public class HomeRController : Controller
+    {
+        // GET: HomeR
+
+        AmitDBEntities obj = new AmitDBEntities();
+        public ActionResult Index()
+        {
+            var dd = obj.studunts.ToList();
+            return View(dd);
+        }
+        public ActionResult create()
+        {
+            
+            return View();
+        }
+        [HttpPost]
+        public ActionResult create(studunt s)
+        {
+            obj.studunts.Add(s);
+
+            obj.SaveChanges();
+
+            return View();
+        }
+        public ActionResult Edit(int id)
+        {
+            var rra = obj.studunts.Where(model => model.id == id).FirstOrDefault();
+
+            return View(rra);
+        }
+        [HttpPost]
+        public ActionResult Edit(studunt s)
+        {
+          if(ModelState.IsValid ==true)
+            {
+                obj.Entry(s).State = EntityState.Modified;
+            }
+            obj.SaveChanges();
+            return View();
+        }
+        public ActionResult delete(int id)
+
+        {
+            var rr = obj.studunts.Where(model => model.id == id).FirstOrDefault();
+            return View(rr);
+
+        }
+        [HttpPost]
+        public ActionResult delete(studunt s)
+        {
+            obj.Entry(s).State = EntityState.Deleted;
+            obj.SaveChanges();
+            return View();
+        }
+        public ActionResult details(int id)
+
+        {
+            var rs= obj.studunts.Where(model => model.id == id).FirstOrDefault();
+            return View(rs);
+        }
+    }
+}
