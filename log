@@ -1,0 +1,191 @@
+using ProjectG.emp;
+using ProjectG.Models;
+using ProjectG.user;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+
+namespace ProjectG.Controllers
+{
+    [Authorize]
+    public class HomeController : Controller
+    {
+        AmitDBEntities obj = new AmitDBEntities();
+        AmitDBEntities1 obj1 = new AmitDBEntities1();
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult About()
+        {
+            ViewBag.Message = "Your application description page.";
+
+            return View();
+        }
+
+        public ActionResult Contact()
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
+        }
+
+        
+
+        
+
+        public ActionResult empdetail()
+        {
+            var result = obj.empinfoes.ToList();
+
+            List<Class1> listss = new List<Class1>();
+            foreach (var item in result)
+            {
+                listss.Add(new Class1
+                {
+                    id = item.id,
+                    First_name = item.First_name,
+                    Last_name = item.Last_name,
+                    Email = item.Email,
+                    Address = item.Address,
+                    Dept = item.Dept,
+                    Salary = item.Salary,
+                });
+            }
+            return View(listss);
+        }
+        public ActionResult delete(int id)
+        {
+            var del = obj.empinfoes.Where(a => a.id == id).First();
+            obj.empinfoes.Remove(del);
+            obj.SaveChanges();
+            return RedirectToAction("empdetail");
+        }
+
+        [HttpGet]
+        public ActionResult Addemp()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Addemp(Class1 ob)
+        {
+
+            empinfo tabobj = new empinfo
+            {
+                id = ob.id,
+                First_name = ob.First_name,
+                Last_name = ob.Last_name,
+                Email = ob.Email,
+                Address = ob.Address,
+                Dept = ob.Dept,
+                Salary = ob.Salary
+            };
+
+            if (ob.id == 0)
+            {
+                ModelState.Clear();
+                obj.empinfoes.Add(tabobj);
+                obj.SaveChanges();
+            }
+            else
+            {
+                obj.Entry(tabobj).State = System.Data.Entity.EntityState.Modified;
+                obj.SaveChanges();
+            }
+            return RedirectToAction("empdetail");
+
+        }
+
+        public ActionResult Edit(int id)
+        {
+            var editdata = obj.empinfoes.FirstOrDefault(a => a.id == id);
+            Class1 ed = new Class1();
+
+            ed.id = editdata.id;
+            ed.First_name = editdata.First_name;
+            ed.Last_name = editdata.Last_name;
+            ed.Email = editdata.Email;
+            ed.Address = editdata.Address;
+            ed.Dept = editdata.Dept;
+            ed.Salary = editdata.Salary;
+
+            TempData["Edit"] = "Edit";
+            return View("Addemp", ed);
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        public ActionResult Register()
+        {
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        public ActionResult Register(Class2 reg)
+        {
+
+            userinfo userobj = new userinfo();
+
+            userobj.Name = reg.Name;
+
+            userobj.Email = reg.Email;
+
+            userobj.Password = reg.Password;
+
+            obj1.userinfoes.Add(userobj);
+            obj1.SaveChanges();
+            return RedirectToAction("Register");
+        }
+        [AllowAnonymous]
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View();
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public ActionResult Login(Class2 obje)
+
+        {
+            var resultt = obj1.userinfoes.Where(a => a.Email == obje.Email).FirstOrDefault();
+            if (resultt == null)
+            {
+                TempData["NotFound"] = "Email not found";
+            }
+            else
+            {
+                if (resultt.Email == obje.Email && resultt.Password == obje.Password)
+                {
+                    FormsAuthentication.SetAuthCookie(resultt.Email, false);
+
+                    Session["Email"] = resultt.Email;
+
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    TempData["Pass"] = "Invalid Password";
+                }
+            }
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            Session.Clear();
+
+            return RedirectToAction("Register");
+        }
+
+    }
+}
+    
