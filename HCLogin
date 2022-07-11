@@ -1,0 +1,130 @@
+
+using crudTeat0.data_conn;
+using crudTeat0.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Security;
+
+namespace crudTeat0.Controllers
+{
+    [Authorize]
+    public class HomeController : Controller
+    {
+        // GET: Home
+        
+        DbTestEntities db = new DbTestEntities();
+    
+        public ActionResult display()
+        {
+          
+            var data = db.student.ToList();
+            List<studentModel> li = new List<studentModel>();
+            foreach (var item in data)
+            {
+                li.Add(new studentModel
+                {
+                    id = item.id,
+                    name = item.name,
+                    gender = item.gender,
+                    mobile = item.mobile,
+                    age = item.age,
+                    email = item.email,
+                    password = item.password,
+                }) ;
+               
+            }
+            return View(li);
+        }
+        public ActionResult delete(int id)
+        {
+            var del = db.student.Where(m => m.id == id).First();
+            db.student.Remove(del);
+            db.SaveChanges();
+            return RedirectToAction("display");
+        }
+        [AllowAnonymous]
+        public ActionResult create ()
+        {
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult create(studentModel ms)
+        {
+            student st = new student();
+            st.id = ms.id;
+            st.name = ms.name;
+            st.gender = ms.gender;
+            st.age = ms.age;
+            st.mobile = ms.mobile;
+            st.email = ms.email;
+            st.password = ms.password;
+            if(st.id == 0)
+            {
+                db.student.Add(st);
+            }
+            else
+            {
+                db.Entry(st).State = System.Data.Entity.EntityState.Modified;
+
+            }
+            db.SaveChanges();
+            return RedirectToAction("display");
+        }
+
+        public ActionResult edit(int id)
+        {
+            var data = db.student.Where(m => m.id == id).First();
+            studentModel st = new studentModel();
+            st.id = data.id;
+            st.name = data.name;
+            st.gender = data.gender;
+            st.age = data.age;
+            st.mobile = data.mobile;
+            st.email = data.email;
+            st.password = data.password;
+            return View("create",st);
+        }
+        [AllowAnonymous]
+        public ActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost] 
+        [AllowAnonymous]
+        public ActionResult Login(studentModel sm)
+        {
+            var data = db.student.Where(m => m.email == sm.email).FirstOrDefault();
+            if( data == null)
+            {
+                TempData["email"] = "email is not found";
+            }
+            else
+            {
+                if(data.email == sm.email && data.password == sm.password)
+                {
+                    FormsAuthentication.SetAuthCookie(data.email, false);
+                    Session["email"] = data.email;
+                    return RedirectToAction("display");
+                }
+                else
+                {
+                    TempData["pass"] = "wrong password";
+                }
+            }
+            return View();
+        }
+        public ActionResult LogOut()
+        {
+            FormsAuthentication.SignOut();
+            Session.Abandon();
+            return View("Login");
+
+        }
+    }
+}
+
+
